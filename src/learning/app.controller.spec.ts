@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { AppModel } from './app-model';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -15,8 +16,8 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return "{"message": "Hello Nest"}"', () => {
+      expect(appController.getHello()).toEqual(new AppModel('Hello Nest'));
     });
   });
 });

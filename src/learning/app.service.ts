@@ -4,6 +4,6 @@ import { AppModel } from './app-model';
 @Injectable()
 export class AppService {
   getHello(): AppModel {
-    return new AppModel('Hello World');
+    return new AppModel('Hello Nest');
   }
 }
