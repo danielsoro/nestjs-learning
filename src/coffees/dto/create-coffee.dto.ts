@@ -1,8 +1,12 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateCoffeeDto {
   @IsString()
-  readonly name: string;
+  readonly title: string;
+
+  @IsString()
+  @IsOptional()
+  readonly descriptiom: string;
 
   @IsString()
   readonly brand: string;
