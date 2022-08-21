@@ -1,9 +1,9 @@
 {
   "name": "nest-learning",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
+  "description": "Simple application used to learn NestJS.",
+  "author": "Daniel Cunha",
+  "url": "http://githu.com/danielsoro/nestjs-learning#readme",
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
