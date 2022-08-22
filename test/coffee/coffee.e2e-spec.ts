@@ -73,7 +73,6 @@ describe('[Feature] Coffees - /coffees', () => {
     return request(httpServer)
       .get('/coffees')
       .then(({ body }) => {
-        console.log(body);
         expect(body.length).toBeGreaterThan(0);
         expect(body[0]).toEqual(expectedPartialCoffee);
       });
