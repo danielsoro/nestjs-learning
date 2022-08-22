@@ -8,8 +8,8 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { CoffeesModule } from '../../src/coffees/coffees.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as request from 'supertest';
+import { CreateCoffeeDto } from 'src/coffees/dto/create-coffee.dto';
 import { UpdateCoffeeDto } from 'src/coffees/dto/update-coffee.dto';
-import { Coffee } from 'src/coffees/entities/coffee.entity';
 
 describe('[Feature] Coffees - /coffees', () => {
   const coffee = {
@@ -59,51 +59,65 @@ describe('[Feature] Coffees - /coffees', () => {
     httpServer = app.getHttpServer();
   });
 
-  afterEach(async () => {
-    httpServer.close();
-    await app.close();
+  it('Create [POST /]', () => {
+    return request(httpServer)
+      .post('/coffees')
+      .send(coffee as CreateCoffeeDto)
+      .expect(HttpStatus.CREATED)
+      .then(({ body }) => {
+        expect(body).toEqual(expectedPartialCoffee);
+      });
   });
 
-  it('Create [POST /]', async () => {
-    const result = await request(httpServer).post('/coffees').send(coffee);
-    expect(result.statusCode).toEqual(HttpStatus.CREATED);
-    expect(result.body).toEqual(expectedPartialCoffee);
+  it('Get all [GET /]', () => {
+    return request(httpServer)
+      .get('/coffees')
+      .then(({ body }) => {
+        console.log(body);
+        expect(body.length).toBeGreaterThan(0);
+        expect(body[0]).toEqual(expectedPartialCoffee);
+      });
   });
 
-  it('Get all [GET /]', async () => {
-    const result = await request(httpServer).get('/coffees');
-    expect(result.body.length).toBeGreaterThan(0);
-    expect(result.body[0]).toEqual(expectedPartialCoffee);
+  it('Get one [GET /:id]', () => {
+    return request(httpServer)
+      .get('/coffees/1')
+      .then(({ body }) => {
+        expect(body).toEqual(expectedPartialCoffee);
+      });
   });
 
-  it('Get one [GET /:id]', async () => {
-    const result = await request(httpServer).get('/coffees/1');
-    expect(result.body).toEqual(expectedPartialCoffee);
-  });
-
-  it('Update one [PATCH /:id]', async () => {
+  it('Update one [PATCH /:id]', () => {
     const updateCoffeeDto: UpdateCoffeeDto = {
       ...coffee,
       title: 'New and Improved Shipwreck Roast',
     };
-
-    const resultPatch = await request(httpServer)
+    return request(httpServer)
       .patch('/coffees/1')
-      .send(updateCoffeeDto);
+      .send(updateCoffeeDto)
+      .then(({ body }) => {
+        expect(body.title).toEqual(updateCoffeeDto.title);
 
-    const coffeResultPatch: Coffee = resultPatch.body as Coffee;
-    expect(coffeResultPatch.title).toEqual(updateCoffeeDto.title);
-
-    const resultGet = await request(httpServer).get('/coffees/1');
-    const coffeResultGet: Coffee = resultGet.body as Coffee;
-    expect(coffeResultGet.title).toEqual(updateCoffeeDto.title);
+        return request(httpServer)
+          .get('/coffees/1')
+          .then(({ body }) => {
+            expect(body.title).toEqual(updateCoffeeDto.title);
+          });
+      });
   });
 
-  it('Delete one [DELETE /:id]', async () => {
-    const resultDelete = await request(httpServer).delete('/coffees/1');
-    expect(resultDelete.statusCode).toEqual(HttpStatus.OK);
+  it('Delete one [DELETE /:id]', () => {
+    return request(httpServer)
+      .delete('/coffees/1')
+      .expect(HttpStatus.OK)
+      .then(() => {
+        return request(httpServer)
+          .get('/coffees/1')
+          .expect(HttpStatus.NOT_FOUND);
+      });
+  });
 
-    const resultGet = await request(httpServer).get('/coffees/1');
-    expect(resultGet.statusCode).toEqual(HttpStatus.NOT_FOUND);
+  afterEach(async () => {
+    await app.close();
   });
 });
