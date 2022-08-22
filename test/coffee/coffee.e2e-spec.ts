@@ -8,7 +8,6 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { CoffeesModule } from '../../src/coffees/coffees.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as request from 'supertest';
-import { CreateCoffeeDto } from 'src/coffees/dto/create-coffee.dto';
 import { UpdateCoffeeDto } from 'src/coffees/dto/update-coffee.dto';
 import { Coffee } from 'src/coffees/entities/coffee.entity';
 
@@ -27,7 +26,7 @@ describe('[Feature] Coffees - /coffees', () => {
   let app: INestApplication;
   let httpServer: HttpServer;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         CoffeesModule,
@@ -60,10 +59,13 @@ describe('[Feature] Coffees - /coffees', () => {
     httpServer = app.getHttpServer();
   });
 
+  afterEach(async () => {
+    httpServer.close();
+    await app.close();
+  });
+
   it('Create [POST /]', async () => {
-    const result = await request(httpServer)
-      .post('/coffees')
-      .send(coffee as CreateCoffeeDto);
+    const result = await request(httpServer).post('/coffees').send(coffee);
     expect(result.statusCode).toEqual(HttpStatus.CREATED);
     expect(result.body).toEqual(expectedPartialCoffee);
   });
@@ -102,11 +104,6 @@ describe('[Feature] Coffees - /coffees', () => {
     expect(resultDelete.statusCode).toEqual(HttpStatus.OK);
 
     const resultGet = await request(httpServer).get('/coffees/1');
-    console.log(resultGet.body);
     expect(resultGet.statusCode).toEqual(HttpStatus.NOT_FOUND);
-  });
-
-  afterAll(async () => {
-    await app.close();
   });
 });
